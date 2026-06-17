@@ -1,0 +1,4 @@
+interface:
+  display_name: "Resume Polish Webpage"
+  short_description: "Turn experience into a polished resume webpage."
+  default_prompt: "Use $resume-polish-webpage to turn my experience, target company, and target role into a polished resume webpage."

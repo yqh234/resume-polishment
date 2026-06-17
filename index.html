@@ -1,0 +1,871 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>简历投递润色器</title>
+  <style>
+    :root {
+      --bg: #f7f4ee;
+      --panel: #fffdf9;
+      --ink: #1d2a33;
+      --muted: #65727b;
+      --line: #e2ddd3;
+      --accent: #2e675d;
+      --accent-2: #b07a42;
+      --soft: #f3eee5;
+      --shadow: 0 18px 44px rgba(70, 58, 42, .10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(255,253,249,.96), rgba(247,244,238,.98) 42%, rgba(238,246,242,.9)),
+        var(--bg);
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: minmax(320px, 430px) minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    aside {
+      border-right: 1px solid rgba(185, 171, 148, .42);
+      background: rgba(255, 253, 248, .88);
+      backdrop-filter: blur(12px);
+      padding: 34px 30px;
+      overflow: auto;
+    }
+
+    main {
+      padding: 42px;
+      overflow: auto;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      font-size: 28px;
+      line-height: 1.18;
+      margin-bottom: 8px;
+      letter-spacing: 0;
+      color: #20333d;
+    }
+
+    aside h1::after {
+      content: "";
+      display: block;
+      width: 42px;
+      height: 3px;
+      margin-top: 12px;
+      border-radius: 999px;
+      background: #c89150;
+    }
+
+    .subtitle {
+      color: #728078;
+      font-size: 14px;
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #34453f;
+      margin: 18px 0 8px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid #e1d9ca;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .9);
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 12px 13px;
+      outline: none;
+      transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
+    }
+
+    input[type="file"] {
+      padding: 10px;
+      background: rgba(255, 255, 255, .7);
+    }
+
+    textarea {
+      scrollbar-color: #b7a78e #f4efe6;
+    }
+
+    textarea { min-height: 124px; resize: vertical; }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(46, 103, 93, .14);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 22px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 1px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 11px 14px;
+      min-height: 42px;
+      color: #fff;
+      background: linear-gradient(135deg, #2f6f63, #24586a);
+      box-shadow: 0 8px 18px rgba(46, 103, 93, .18);
+    }
+
+    button.secondary {
+      color: #31443d;
+      background: rgba(255, 255, 255, .78);
+      border-color: #ded5c5;
+      box-shadow: none;
+    }
+
+    button:hover { filter: brightness(.98); }
+
+    .company-advice {
+      display: none;
+      margin-top: 10px;
+      padding: 12px 13px;
+      border: 1px solid #e3d6c1;
+      border-radius: 10px;
+      background: #fffaf1;
+      color: #405048;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .company-advice strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #26352f;
+      font-size: 14px;
+    }
+
+    .company-advice a {
+      color: #24565f;
+      font-weight: 700;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(36, 86, 95, .28);
+    }
+
+    .company-advice a:hover {
+      border-bottom-color: #24565f;
+    }
+
+    .resume {
+      max-width: 920px;
+      margin: 0 auto;
+      background: var(--panel);
+      border: 1px solid #e2d8c9;
+      box-shadow: var(--shadow);
+      padding: 34px 38px 42px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .resume::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 5px;
+      background: linear-gradient(90deg, #2e675d, #b07a42);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 96px;
+      gap: 24px;
+      padding: 10px 0 22px;
+      border-bottom: 0;
+      background: #fff;
+    }
+
+    .photo {
+      width: 90px;
+      height: 118px;
+      align-self: start;
+      justify-self: end;
+      border: 1px solid #d9cdbb;
+      background: linear-gradient(180deg, #fffaf2, #f0eadf);
+      color: #8a7a64;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 700;
+      overflow: hidden;
+    }
+
+    .photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .name {
+      font-size: 30px;
+      line-height: 1.12;
+      font-weight: 800;
+      margin-bottom: 10px;
+      letter-spacing: 0;
+      color: #24565f;
+    }
+
+    .target {
+      color: #343f4a;
+      font-size: 15px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .summary {
+      color: #344352;
+      line-height: 1.8;
+      font-size: 15px;
+      margin-bottom: 0;
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 42px;
+      color: #2f3a44;
+      font-size: 15px;
+      margin-top: 8px;
+    }
+
+    .meta span {
+      display: block;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      border-radius: 0;
+      line-height: 1.8;
+    }
+
+    .meta span::before {
+      content: "";
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      margin-right: 8px;
+      border-radius: 50%;
+      background: #c89150;
+      vertical-align: middle;
+    }
+
+    .meta .intent {
+      color: #111820;
+      font-weight: 800;
+    }
+
+    .meta .intent::before {
+      background: #c89150;
+    }
+
+    .resume-body {
+      display: block;
+    }
+
+    .side, .content {
+      padding: 0;
+    }
+
+    .side {
+      background: #fff;
+      border-right: 0;
+    }
+
+    .section {
+      margin-bottom: 18px;
+    }
+
+    .section h2 {
+      font-size: 17px;
+      letter-spacing: 0;
+      text-transform: none;
+      color: #24565f;
+      background: linear-gradient(90deg, #e8f0ed, #f4eee3);
+      border-bottom: 0;
+      padding: 8px 11px;
+      margin-bottom: 10px;
+      font-weight: 800;
+      border-left: 4px solid #2e675d;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      border: 0;
+      background: transparent;
+      border-radius: 0;
+      padding: 0;
+      font-size: 15px;
+      color: #32414f;
+    }
+
+    .chip::after {
+      content: " / ";
+      color: #9aa6b1;
+      margin: 0 4px;
+    }
+
+    .chip:last-child::after { content: ""; }
+
+    .metric {
+      display: grid;
+      gap: 4px;
+      border-left: 3px solid var(--accent-2);
+      padding: 8px 0 8px 12px;
+      margin-bottom: 12px;
+    }
+
+    .metric strong {
+      font-size: 15px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .item {
+      padding: 0 0 14px;
+      margin-bottom: 14px;
+      border-bottom: 0;
+    }
+
+    .item:last-child {
+      border-bottom: 0;
+      margin-bottom: 0;
+    }
+
+    .item h3 {
+      font-size: 16px;
+      margin-bottom: 7px;
+      display: grid;
+      grid-template-columns: 1.1fr 1.2fr .7fr;
+      gap: 12px;
+      align-items: baseline;
+      color: #202b33;
+    }
+
+    .item h3 span:nth-child(2) { text-align: center; }
+    .item h3 span:nth-child(3) { text-align: right; }
+
+    .item p {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    li {
+      margin: 6px 0;
+      line-height: 1.68;
+      color: #1f252b;
+    }
+
+    .plain-list {
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .plain-list li {
+      padding-left: 14px;
+      position: relative;
+    }
+
+    .plain-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: .82em;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #b07a42;
+    }
+
+    .empty {
+      max-width: 760px;
+      margin: 14vh auto 0;
+      color: var(--muted);
+      line-height: 1.8;
+      text-align: center;
+    }
+
+    body[data-style="executive"] {
+      --accent: #223a5e;
+      --accent-2: #606c76;
+      --soft: #f1f4f7;
+    }
+
+    body[data-style="analytical"] {
+      --accent: #1f6f9f;
+      --accent-2: #219c8c;
+      --soft: #edf6fa;
+    }
+
+    body[data-style="product"] {
+      --accent: #365f7b;
+      --accent-2: #b56542;
+      --soft: #f5f3ef;
+    }
+
+    body[data-style="technical"] {
+      --accent: #2b5368;
+      --accent-2: #3d826d;
+      --soft: #edf3f4;
+    }
+
+    body[data-style="warm"] {
+      --accent: #456653;
+      --accent-2: #8a6745;
+      --soft: #f6f4ee;
+    }
+
+    @media (max-width: 920px) {
+      .app, .hero, .resume-body {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      main { padding: 18px; }
+      .hero, .side, .content { padding: 0; }
+      .resume { padding: 28px 24px 32px; }
+      .photo { justify-self: start; }
+      .side { border-right: 0; border-bottom: 1px solid var(--line); }
+    }
+
+    @media (max-width: 560px) {
+      aside { padding: 20px; }
+      .row { grid-template-columns: 1fr; }
+      .actions button { width: 100%; }
+      .name { font-size: 28px; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      aside { display: none; }
+      main { padding: 0; }
+      .app { display: block; min-height: auto; }
+      .resume {
+        border: 0;
+        box-shadow: none;
+        max-width: none;
+      }
+      .hero, .side, .content {
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body data-style="executive">
+  <div class="app">
+    <aside>
+      <h1>简历投递润色器</h1>
+      <p class="subtitle">按岗位匹配、信息清楚、成果可信三条标准提问，把素材整理成可投递的简历正文。</p>
+
+      <label for="rawProfile">一键识别素材</label>
+      <textarea id="rawProfile">把你的经历、意向公司、目标岗位、岗位JD、教育背景、项目经历、技能证书等整段粘贴到这里。点击“识别并生成”后，我会自动拆分到下面的问题里。</textarea>
+
+      <label for="candidate">姓名</label>
+      <input id="candidate" value="候选人姓名">
+
+      <label for="company">意向公司</label>
+      <input id="company" value="目标公司">
+      <div class="company-advice" id="companyAdvice"></div>
+
+      <label for="role">意向岗位</label>
+      <input id="role" value="目标岗位">
+
+      <label for="contact">联系方式</label>
+      <input id="contact" value="手机 / 邮箱 / 城市">
+
+      <label for="photoInput">证件照 / 个人照片</label>
+      <input id="photoInput" type="file" accept="image/*">
+
+      <label for="links">相关链接</label>
+      <input id="links" value="作品集 / GitHub / 个人主页（没有可留空）">
+
+      <label for="jd">1. 目标岗位最看重什么？</label>
+      <textarea id="jd">岗位职责、任职要求、行业方向、反复出现的关键词。例如：项目管理、内容运营、财务分析、客户开发、用户研究、供应链、法务合规、数据分析、软件开发、教学教研。</textarea>
+
+      <label for="education">2. 教育背景里哪些信息与岗位相关？</label>
+      <textarea id="education">学校｜专业｜学历｜时间
+GPA / 排名 / 相关课程 / 奖项
+示例：XX大学｜目标岗位相关专业｜本科｜2023.09-2027.06；GPA 3.7/4.0；相关课程：与岗位直接相关的课程、训练或研究方向。</textarea>
+
+      <label for="work">3. 实习或工作经历：你做了什么、用什么方法、结果如何？</label>
+      <textarea id="work">公司｜岗位｜时间
+动作 + 工作对象 + 方法/工具 + 量化结果
+示例：使用 Python 清洗并分析约2万条实验数据，建立自动化处理脚本，将单次数据整理时间由2小时缩短至20分钟。</textarea>
+
+      <label for="projects">4. 项目经历：目标、个人职责、方法过程、项目结果是什么？</label>
+      <textarea id="projects">项目名称｜角色｜时间
+项目目标：
+个人职责：
+方法过程：
+项目结果：
+请说明是独立负责、参与完成还是协助。</textarea>
+
+      <label for="skills">5. 技能、证书和奖项：哪些能被经历证明？</label>
+      <textarea id="skills">编程与工具：
+专业技能：
+语言能力：
+证书与奖项：
+请只写真实可追问的技能，不要全部写“精通”。</textarea>
+
+      <div class="actions">
+        <button id="autoGenerate">识别并生成</button>
+        <button id="generate">生成简历</button>
+        <button class="secondary" id="copy">复制正文</button>
+        <button class="secondary" id="print">打印</button>
+      </div>
+    </aside>
+
+    <main>
+      <article class="resume" id="resume">
+        <section class="hero">
+          <div>
+            <div class="name" id="outName">候选人姓名</div>
+            <div class="meta">
+              <span id="outContact">手机 / 邮箱 / 城市</span>
+              <span class="intent" id="outCompany">意向：目标岗位 / 目标公司</span>
+            </div>
+          </div>
+          <div class="photo" id="outPhoto">照片</div>
+        </section>
+
+        <div class="resume-body">
+          <section class="section">
+            <h2>个人优势</h2>
+            <p class="summary" id="outSummary">具备清晰的业务理解、结构化执行和跨团队协作能力，能够围绕目标岗位要求，将项目经验转化为可落地的交付成果。</p>
+            <div class="chips" id="outSkills"></div>
+          </section>
+
+          <section class="section">
+            <h2>教育 / 背景</h2>
+            <div class="item">
+              <h3><span>待补充时间</span><span>教育背景或专业背景</span><span>待补充</span></h3>
+              <ul class="plain-list" id="outHighlights"></ul>
+            </div>
+          </section>
+
+          <section class="section">
+            <h2>工作经验</h2>
+            <div class="item">
+              <h3 id="outExperienceTitle"><span>近期经历</span><span>与目标岗位相关经历</span><span>核心贡献</span></h3>
+              <ul id="outBullets"></ul>
+            </div>
+          </section>
+
+          <section class="section">
+            <h2>项目经验</h2>
+            <div id="outMetrics"></div>
+          </section>
+
+          <section class="section">
+            <h2>技能关键词</h2>
+            <div class="chips" id="outKeywords"></div>
+          </section>
+        </div>
+      </article>
+    </main>
+  </div>
+
+  <script>
+    const byId = (id) => document.getElementById(id);
+
+    const styleSkills = {
+      executive: ["战略理解", "目标拆解", "跨部门推进", "结果复盘", "稳健交付", "商业判断"],
+      analytical: ["数据分析", "指标拆解", "问题定位", "结构化表达", "决策支持", "流程优化"],
+      product: ["需求洞察", "用户理解", "产品协作", "增长思维", "体验优化", "项目推进"],
+      technical: ["技术落地", "系统思维", "自动化改进", "质量意识", "问题排查", "工程协作"],
+      warm: ["沟通协调", "服务意识", "组织执行", "内容表达", "关系维护", "持续改进"],
+      creative: ["创意表达", "内容策划", "审美判断", "用户感知", "品牌理解", "作品沉淀"],
+      operations: ["流程管理", "资源协调", "执行落地", "用户运营", "复盘优化", "效率提升"],
+      finance: ["数据严谨", "风险意识", "财务分析", "合规意识", "细节把控", "报告输出"]
+    };
+
+    function inferStyle(role, jd, experience) {
+      const text = `${role} ${jd} ${experience}`.toLowerCase();
+      if (/工程|开发|算法|ai|数据工程|后端|前端|测试|运维|安全|java|python|sql|devops/.test(text)) return "technical";
+      if (/市场|品牌|内容|新媒体|文案|设计|视觉|视频|剪辑|广告|策划|公关/.test(text)) return "creative";
+      if (/财务|会计|审计|税务|金融|投行|证券|基金|保险|法务|合规|风控/.test(text)) return "finance";
+      if (/数据|分析|指标|研究|策略|商业分析|bi|建模/.test(text)) return "analytical";
+      if (/产品|用户|增长|体验|需求|项目经理|pm/.test(text)) return "product";
+      if (/运营|活动|社群|供应链|采购|物流|项目管理|流程|交付|门店|电商/.test(text)) return "operations";
+      if (/人力|行政|教育|教师|教研|客服|客户成功|护理|医疗|咨询|协调/.test(text)) return "warm";
+      return "executive";
+    }
+
+    function cleanLines(text) {
+      return text
+        .split(/\n|；|;/)
+        .map(line => line.replace(/^[-*•\d.\s]+/, "").trim())
+        .filter(Boolean);
+    }
+
+    function keywordList(text, fallback) {
+      const words = text
+        .replace(/[，。；、/|]/g, " ")
+        .split(/\s+/)
+        .map(x => x.trim())
+        .filter(x => x.length >= 2 && x.length <= 18);
+      return Array.from(new Set(words)).slice(0, 8).concat(fallback).slice(0, 10);
+    }
+
+    function companyStyleAdvice(company, role) {
+      const name = company.trim();
+      const text = `${name} ${role}`.toLowerCase();
+      if (!name || name === "目标公司") return "";
+
+      let style = "建议使用清晰、稳重、证据充分的正式简历风格，重点展示岗位匹配、项目结果和可追问的成果数据。";
+      if (/华为|大疆|比亚迪|宁德|中兴|海康|芯片|半导体|光电|硬件|制造|智能|自动化|huawei/.test(text)) {
+        style = "偏硬件/制造/技术型公司：突出专业背景、工程项目、调试经验、可靠性和技术表达能力。";
+      } else if (/字节|腾讯|阿里|百度|美团|快手|京东|拼多多|网易|小米|bytedance|tencent|alibaba/.test(text)) {
+        style = "偏互联网/科技公司：突出项目影响、数据结果、学习速度和跨团队协作，排版保持简洁密集。";
+      } else if (/银行|证券|基金|保险|金融|投行|咨询|四大|德勤|普华|毕马威|安永|麦肯锡|bcg|贝恩/.test(text)) {
+        style = "偏金融/咨询/专业服务公司：突出学校背景、成绩排名、分析能力、结构化表达和结果指标。";
+      } else if (/外企|微软|google|amazon|tesla|apple|siemens|bosch|ge|ibm/.test(text)) {
+        style = "偏外企/国际化公司：语言更简洁直接，强调职责边界、个人贡献、英文能力和可验证结果。";
+      } else if (/宝洁|联合利华|欧莱雅|可口可乐|快消|零售|品牌|市场|广告|传媒|内容|设计/.test(text)) {
+        style = "偏品牌/市场/创意型公司：突出用户洞察、内容作品、活动结果、审美判断和业务转化，不要只写创意感受。";
+      } else if (/学校|教育|培训|教培|新东方|好未来|医疗|医院|护理|健康/.test(text)) {
+        style = "偏教育/医疗/服务型机构：突出专业资质、服务对象、沟通耐心、案例结果和稳定交付能力。";
+      } else if (/国企|央企|政府|事业单位|能源|电网|烟草|铁路|地产|建筑|工程管理/.test(text)) {
+        style = "偏国企/事业单位/工程管理类组织：突出稳定性、规范意识、执行落地、文档质量和协同推进能力。";
+      }
+
+      const links = [
+        [`${name} ${role} 招聘要求`, "查岗位要求"],
+        [`${name} 校招 简历 面经 ${role}`, "查面经/简历偏好"],
+        [`${name} 招聘官网 ${role}`, "查招聘官网"]
+      ].map(([query, label]) =>
+        `<a target="_blank" rel="noopener" href="https://www.bing.com/search?q=${encodeURIComponent(query)}">${label}</a>`
+      ).join(" · ");
+
+      return `<strong>公司风格提醒</strong>${style}<br>建议搜索：${links}`;
+    }
+
+    function updateCompanyAdvice() {
+      const box = byId("companyAdvice");
+      const html = companyStyleAdvice(byId("company").value, byId("role").value);
+      box.innerHTML = html;
+      box.style.display = html ? "block" : "none";
+    }
+
+    function extractBlock(text, labels) {
+      const lines = text.split(/\r?\n/);
+      const starts = labels.map(label => lines.findIndex(line => line.includes(label))).filter(i => i >= 0);
+      if (!starts.length) return "";
+      const start = Math.min(...starts);
+      const end = lines.findIndex((line, index) =>
+        index > start && /^(基本信息|教育背景|教育经历|实习经历|工作经历|工作经验|项目经历|项目经验|技能证书|专业技能|个人技能|证书奖项|荣誉奖项|求职意向|岗位要求|任职要求|JD|自我评价)[:：]?$/.test(line.trim())
+      );
+      return lines.slice(start + 1, end > start ? end : lines.length).join("\n").trim();
+    }
+
+    function firstMatch(text, patterns, fallback = "") {
+      for (const pattern of patterns) {
+        const match = text.match(pattern);
+        if (match) return (match[1] || match[0]).trim();
+      }
+      return fallback;
+    }
+
+    function autoRecognize() {
+      const raw = byId("rawProfile").value.trim();
+      if (!raw) return generate();
+
+      const phone = firstMatch(raw, [/(1[3-9]\d{9})/]);
+      const email = firstMatch(raw, [/([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})/]);
+      const city = firstMatch(raw, [/(北京|上海|广州|深圳|杭州|南京|苏州|成都|武汉|西安|天津|重庆|常州|无锡|合肥|长沙|郑州|青岛|厦门|宁波|珠海|佛山)/]);
+      const name = firstMatch(raw, [
+        /姓名[:：\s]*([\u4e00-\u9fa5]{2,4})/,
+        /^([\u4e00-\u9fa5]{2,4})$/m
+      ], byId("candidate").value.trim());
+      const role = firstMatch(raw, [
+        /求职(?:意向|岗位)[:：\s]*([^\n｜|]{2,30})/,
+        /应聘(?:岗位)?[:：\s]*([^\n｜|]{2,30})/,
+        /目标岗位[:：\s]*([^\n｜|]{2,30})/,
+        /岗位[:：\s]*([^\n｜|]{2,30})/
+      ], byId("role").value.trim());
+      const company = firstMatch(raw, [
+        /意向公司[:：\s]*([^\n｜|]{2,40})/,
+        /目标公司[:：\s]*([^\n｜|]{2,40})/,
+        /投递公司[:：\s]*([^\n｜|]{2,40})/
+      ], byId("company").value.trim());
+
+      const education = extractBlock(raw, ["教育背景", "教育经历"]) || cleanLines(raw).filter(line => /大学|学院|本科|硕士|博士|GPA|专业|主修课程|排名/.test(line)).slice(0, 6).join("\n");
+      const work = extractBlock(raw, ["工作经验", "工作经历", "实习经历"]) || cleanLines(raw).filter(line => /公司|机构|实习|负责|参与|协助|推动|完成|客户|用户|销售|运营|市场|财务|人力|行政|教育|设计|内容|采购|供应链|提升|降低|优化/.test(line)).slice(0, 8).join("\n");
+      const projects = extractBlock(raw, ["项目经验", "项目经历"]) || cleanLines(raw).filter(line => /项目|课题|比赛|作品|案例|活动|方案|设计|系统|模型|调研|分析|策划|执行|复盘|开发|调试|模块/.test(line)).slice(0, 10).join("\n");
+      const skills = extractBlock(raw, ["技能证书", "专业技能", "个人技能", "证书奖项", "荣誉奖项"]) || cleanLines(raw).filter(line => /Python|MATLAB|C\+\+|C语言|Java|SQL|Excel|PPT|Word|PowerPoint|SPSS|Tableau|Photoshop|PS|剪辑|英语|CET|雅思|托福|证书|奖|资格|普通话|教师资格|会计|CPA|法律/.test(line)).slice(0, 8).join("\n");
+      const proof = cleanLines(raw)
+        .filter(line => /\d+|%|百分|提升|降低|缩短|准确率|排名|奖|用户|客户|模块|文档|数据/.test(line))
+        .filter(line => !/电话|手机|邮箱|@|大学|学院|本科|硕士|博士|GPA|主修课程/.test(line))
+        .slice(0, 10)
+        .join("\n");
+      const jd = extractBlock(raw, ["岗位要求", "任职要求", "JD"]) || cleanLines(raw).filter(line => /要求|职责|熟悉|掌握|能力|经验|优先|岗位|任职/.test(line)).slice(0, 8).join("\n");
+
+      if (name) byId("candidate").value = name;
+      if (company) byId("company").value = company;
+      if (role) byId("role").value = role;
+      byId("contact").value = [phone, email, city].filter(Boolean).join(" / ") || byId("contact").value;
+      if (jd) byId("jd").value = jd;
+      if (education) byId("education").value = education;
+      if (work) byId("work").value = work;
+      if (projects) byId("projects").value = projects;
+      if (skills) byId("skills").value = skills;
+      window.autoProof = proof;
+      updateCompanyAdvice();
+
+      generate();
+    }
+
+    function polishedBullet(line, role, company) {
+      const normalized = line.replace(/[。.]$/, "");
+      if (/提升|降低|增长|优化|完成|负责|参与|推动|搭建|设计|分析|输出/.test(normalized)) {
+        return normalized + "，并将相关经验沉淀为可复用的岗位匹配能力。";
+      }
+      return `围绕${company} ${role}的岗位要求，完成${normalized}，体现出问题拆解、协作推进与结果交付能力。`;
+    }
+
+    function renderChips(container, items) {
+      container.innerHTML = "";
+      items.forEach(item => {
+        const span = document.createElement("span");
+        span.className = "chip";
+        span.textContent = item;
+        container.appendChild(span);
+      });
+    }
+
+    function renderMetrics(lines, role) {
+      const metrics = byId("outMetrics");
+      metrics.innerHTML = "";
+      const list = [
+        ["项目一", role, lines[0] || "能够把复杂任务拆解为可执行计划并推进落地。"],
+        ["项目二", "协作推进", lines[1] || "具备跨团队沟通、需求澄清和过程跟踪经验。"],
+        ["项目三", "复盘沉淀", lines[2] || "能够围绕目标结果复盘过程，并沉淀可复用方法。"]
+      ];
+      list.forEach(([time, title, desc]) => {
+        const box = document.createElement("div");
+        box.className = "item";
+        box.innerHTML = `<h3><span>${time}</span><span>${title}</span><span>相关经历</span></h3><ul><li>${desc}</li></ul>`;
+        metrics.appendChild(box);
+      });
+    }
+
+    function generate() {
+      const candidate = byId("candidate").value.trim() || "候选人姓名";
+      const company = byId("company").value.trim() || "目标公司";
+      const role = byId("role").value.trim() || "目标岗位";
+      const contact = byId("contact").value.trim() || "手机 / 邮箱 / 城市";
+      const jd = byId("jd").value.trim();
+      const education = byId("education").value.trim();
+      const work = byId("work").value.trim();
+      const projects = byId("projects").value.trim();
+      const skillText = byId("skills").value.trim();
+      const proof = window.autoProof || cleanLines([work, projects, skillText].join("\n"))
+        .filter(line => /\d+|%|百分|提升|降低|缩短|准确率|排名|奖|用户|客户|模块|文档|数据/.test(line))
+        .filter(line => !/电话|手机|邮箱|@|大学|学院|本科|硕士|博士|GPA|主修课程/.test(line))
+        .slice(0, 10)
+        .join("\n");
+      const experience = [education, work, projects, skillText, proof].join("\n");
+      const lines = cleanLines(work || experience);
+      const projectLines = cleanLines(projects || proof);
+      const style = inferStyle(role, jd, experience);
+      const skills = styleSkills[style];
+      const keywords = keywordList([jd, skillText].join("\n"), skills);
+      const bullets = (lines.length ? lines : ["梳理业务问题并推动解决方案落地", "协调相关方完成项目交付", "复盘项目结果并沉淀方法"]).slice(0, 6);
+
+      document.body.dataset.style = style;
+      byId("outName").textContent = candidate;
+      byId("outContact").textContent = contact;
+      byId("outCompany").textContent = `意向：${role} / ${company}`;
+      byId("outExperienceTitle").innerHTML = `<span>近期经历</span><span>${role}相关经历</span><span>核心贡献</span>`;
+      byId("outSummary").textContent = `面向${company}${role}岗位，候选人具备${skills.slice(0, 3).join("、")}等能力，能够基于业务目标完成问题拆解、过程推进与结果复盘，适合承担需要稳定交付和跨团队协作的工作。`;
+
+      renderChips(byId("outSkills"), skills);
+      renderChips(byId("outKeywords"), keywords);
+      renderMetrics(projectLines.length ? projectLines : lines, role);
+
+      const educationBrief = cleanLines(education).slice(0, 3).join("；");
+      const proofBrief = cleanLines(proof).slice(0, 3).join("；");
+      const highlights = [
+        `求职方向：${role}，目标公司：${company}。`,
+        educationBrief || "教育背景：请补充学校、专业、学历、时间、GPA、排名或相关课程。",
+        proofBrief ? `成果证据：${proofBrief}` : "成果可信度：建议补充数据量、效率、准确率、用户数、排名或项目规模。"
+      ];
+      byId("outHighlights").innerHTML = highlights.map(x => `<li>${x}</li>`).join("");
+      byId("outBullets").innerHTML = bullets.map(x => `<li>${polishedBullet(x, role, company)}</li>`).join("");
+    }
+
+    byId("autoGenerate").addEventListener("click", autoRecognize);
+    byId("generate").addEventListener("click", generate);
+    byId("company").addEventListener("input", updateCompanyAdvice);
+    byId("role").addEventListener("input", updateCompanyAdvice);
+    byId("photoInput").addEventListener("change", (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        byId("outPhoto").innerHTML = `<img alt="候选人照片" src="${reader.result}">`;
+      };
+      reader.readAsDataURL(file);
+    });
+    byId("print").addEventListener("click", () => window.print());
+    byId("copy").addEventListener("click", async () => {
+      const text = byId("resume").innerText.replace(/\n{3,}/g, "\n\n");
+      await navigator.clipboard.writeText(text);
+      byId("copy").textContent = "已复制";
+      setTimeout(() => byId("copy").textContent = "复制正文", 1200);
+    });
+    updateCompanyAdvice();
+    generate();
+  </script>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>模拟简历 - 技术销售工程师</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 42px 18px;
+      font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+      color: #1d2a33;
+      background: linear-gradient(135deg, #fffdf9, #f7f4ee 48%, #eef6f2);
+    }
+    .resume {
+      position: relative;
+      overflow: hidden;
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 34px 38px 42px;
+      background: #fffdf9;
+      border: 1px solid #e2d8c9;
+      box-shadow: 0 18px 44px rgba(70, 58, 42, .10);
+    }
+    .resume::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 5px;
+      background: linear-gradient(90deg, #2e675d, #b07a42);
+    }
+    .name {
+      margin: 10px 0 10px;
+      font-size: 30px;
+      line-height: 1.12;
+      font-weight: 800;
+      color: #24565f;
+    }
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 96px;
+      gap: 24px;
+      align-items: start;
+      margin-bottom: 22px;
+    }
+    .photo {
+      width: 90px;
+      height: 118px;
+      justify-self: end;
+      border: 1px solid #d9cdbb;
+      background: linear-gradient(180deg, #fffaf2, #f0eadf);
+      color: #8a7a64;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .target {
+      margin-bottom: 12px;
+      color: #343f4a;
+      font-size: 15px;
+      font-weight: 800;
+    }
+    .meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 42px;
+      margin-bottom: 22px;
+      color: #2f3a44;
+      font-size: 15px;
+    }
+    .meta span { line-height: 1.8; }
+    .meta span::before {
+      content: "";
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      margin-right: 8px;
+      border-radius: 50%;
+      background: #c89150;
+      vertical-align: middle;
+    }
+    .meta .intent {
+      color: #111820;
+      font-weight: 800;
+    }
+    .meta .intent::before { background: #c89150; }
+    .section { margin-bottom: 18px; }
+    h2 {
+      margin: 0 0 10px;
+      padding: 8px 11px;
+      color: #24565f;
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: 0;
+      background: linear-gradient(90deg, #e8f0ed, #f4eee3);
+      border-left: 4px solid #2e675d;
+    }
+    .summary {
+      margin: 0 0 10px;
+      color: #344352;
+      font-size: 15px;
+      line-height: 1.8;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      color: #32414f;
+      font-size: 15px;
+    }
+    .chip::after {
+      content: " / ";
+      color: #9aa6b1;
+      margin: 0 4px;
+    }
+    .chip:last-child::after { content: ""; }
+    .item {
+      padding-bottom: 14px;
+      margin-bottom: 14px;
+    }
+    h3 {
+      display: grid;
+      grid-template-columns: 1.1fr 1.2fr .7fr;
+      gap: 12px;
+      align-items: baseline;
+      margin: 0 0 7px;
+      color: #202b33;
+      font-size: 16px;
+    }
+    h3 span:nth-child(2) { text-align: center; }
+    h3 span:nth-child(3) { text-align: right; }
+    ul { margin: 0; padding-left: 18px; }
+    li {
+      margin: 6px 0;
+      color: #1f252b;
+      line-height: 1.68;
+    }
+    .plain-list {
+      padding-left: 0;
+      list-style: none;
+    }
+    .plain-list li {
+      position: relative;
+      padding-left: 14px;
+    }
+    .plain-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: .82em;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #b07a42;
+    }
+    @media (max-width: 720px) {
+      body { padding: 18px; }
+      .resume { padding: 28px 24px 32px; }
+      header, .meta, h3 { grid-template-columns: 1fr; }
+      .photo { justify-self: start; }
+      h3 span:nth-child(2), h3 span:nth-child(3) { text-align: left; }
+    }
+    @media print {
+      body { padding: 0; background: #fff; }
+      .resume { border: 0; box-shadow: none; max-width: none; }
+    }
+  </style>
+</head>
+<body>
+  <article class="resume">
+    <header>
+      <div>
+        <div class="name">杨棋皓</div>
+        <div class="meta">
+          <span>13626256429 / yangqihao@example.com / 上海、北京</span>
+          <span class="intent">意向：技术销售工程师 / 某智能硬件科技公司</span>
+        </div>
+      </div>
+      <div class="photo">照片</div>
+    </header>
+
+    <section class="section">
+      <h2>个人优势</h2>
+      <p class="summary">光电信息科学与工程本科背景，兼具技术项目经验与客户沟通经历。能够理解光电、嵌入式与图像处理相关技术场景，并将技术能力转化为客户需求分析、方案表达和销售推进中的可信沟通。</p>
+      <div class="chips">
+        <span class="chip">光电专业背景</span>
+        <span class="chip">客户需求分析</span>
+        <span class="chip">技术方案表达</span>
+        <span class="chip">项目推进</span>
+        <span class="chip">数据与结果意识</span>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>教育背景</h2>
+      <div class="item">
+        <h3><span>2023.09 - 2027.06</span><span>北京理工大学</span><span>本科</span></h3>
+        <ul class="plain-list">
+          <li>光电信息科学与工程，GPA 3.2/4.0。</li>
+          <li>相关课程：激光原理、模拟电路、数字电路、半导体物理、嵌入式与接口技术、光通信原理。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>工作经验</h2>
+      <div class="item">
+        <h3><span>2025.02 - 2026.02</span><span>海文考研</span><span>校园大使</span></h3>
+        <ul>
+          <li>负责校园推广与品牌宣传，覆盖周边多所高校，提升机构知名度与生源曝光量约10%。</li>
+          <li>针对意向学员进行需求分析、专业咨询与持续跟进，每周跟进20+客户，推动报名转化。</li>
+          <li>将客户沟通、需求匹配和转化跟进方法沉淀为可复用话术，体现技术销售岗位所需的客户理解与目标执行能力。</li>
+        </ul>
+      </div>
+      <div class="item">
+        <h3><span>2024.04 - 2025.05</span><span>北京 YAO Club</span><span>客户顾问</span></h3>
+        <ul>
+          <li>负责客户开发、接待与长期维护，建立500+人数的活跃客户群并持续运营。</li>
+          <li>参与营销活动落地，配合团队提升门店业绩，本季度营业额较上一季度提升30%。</li>
+          <li>在高频客户沟通中锻炼需求识别、异议处理和关系维护能力，可迁移至技术销售的售前沟通场景。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>项目经验</h2>
+      <div class="item">
+        <h3><span>2024.12 - 2025.12</span><span>基于深度学习的荧光图像分辨率增强</span><span>项目主持人</span></h3>
+        <ul>
+          <li>搭建深度学习模型并完成结果可视化，将图像分辨率提升30%以上。</li>
+          <li>负责项目方案梳理、进度推进和成果展示，项目获校级奖项，排名前10%。</li>
+          <li>能够将复杂技术过程转化为清晰展示材料，适合技术销售岗位中的方案讲解与客户演示。</li>
+        </ul>
+      </div>
+      <div class="item">
+        <h3><span>2025.09 - 2026.01</span><span>嵌入式系统设计</span><span>个人项目</span></h3>
+        <ul>
+          <li>使用汇编语言在 Proteus 中完成数据存储模块开发，存储准确率达到100%。</li>
+          <li>完成10+次仿真调试并输出标准设计报告，系统运行稳定，文档逻辑完整、可复现。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>技能关键词</h2>
+      <div class="chips">
+        <span class="chip">光电系统基础</span>
+        <span class="chip">客户沟通</span>
+        <span class="chip">技术方案表达</span>
+        <span class="chip">Python</span>
+        <span class="chip">MATLAB</span>
+        <span class="chip">Multisim</span>
+        <span class="chip">Proteus</span>
+        <span class="chip">Blender 可视化</span>
+      </div>
+    </section>
+  </article>
+</body>
+</html>
