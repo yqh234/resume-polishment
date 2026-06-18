@@ -9,7 +9,7 @@ description: Generate a polished, job-application-ready resume webpage and resum
 
 Turn raw career experience into a tailored resume webpage with professional visual styling and application-ready copy. Require the user to provide their experience, target company, and target role before producing the final resume.
 
-When extending the tool's data model, privacy behavior, or matching logic, read `references/github-benchmarks.md`.
+When extending the tool's data model, privacy behavior, matching logic, imports, or versioning, read `references/github-benchmarks.md` and `references/resume-data-contract.md`.
 
 ## Required Inputs
 
@@ -23,17 +23,20 @@ If the user gives only a brief experience, ask up to five focused follow-up ques
 
 ## Workflow
 
-1. Parse the user's raw experience into evidence units: responsibility, action, tool/method, result, metric, domain, collaboration, leadership, and transferable skill.
-2. Normalize the material into a reusable structure inspired by JSON Resume: basics, work, projects, education, skills, certificates, and target role metadata. Preserve the user's original wording alongside rewritten content when traceability matters.
-3. Infer the target role's hiring signals from the company, role, and supplied job description: hard skills, tools, soft skills, domain terms, responsibilities, and seniority.
-4. Compare the job description with the resume using transparent exact and normalized keyword matching. Report matched terms, missing terms, evidence coverage, and information completeness. Never present a heuristic score as the target company's real ATS score.
-5. Read `references/aesthetic-effects-library.md` and choose one workplace-appropriate aesthetic profile. Prefer restrained, credible, scan-friendly styles over decorative or consumer-brand styles.
-6. Rewrite the resume content in a factual, evidence-first way. Do not fabricate degrees, employers, dates, certifications, revenue, awards, or metrics. If a strong metric is missing, phrase the impact qualitatively or mark a placeholder for user confirmation.
-7. Run a credibility and privacy audit. Flag unsupported superlatives, unverified metrics, unclear personal contribution, and unnecessary sensitive data such as identity numbers, family details, marital status, or exact home address.
-8. Generate a single-page responsive HTML resume website unless the user asks for a different format. Include embedded CSS and no external build step unless the surrounding project already uses one.
-9. Keep resume data local by default. When useful, include local draft persistence and JSON import/export so the user owns and can reuse their data.
-10. Save the webpage as an output artifact when working in a filesystem environment. Use a clear filename such as `resume-<company>-<role>.html`.
-11. Provide a concise summary of the positioning, selected visual style, match gaps, and any facts that need user confirmation.
+1. Accept pasted text or extract text locally from PDF, DOCX, or TXT input. Show the extracted text before transforming it so the user can check ATS readability and parser omissions.
+2. Parse the user's raw experience into evidence units: responsibility, action, tool/method, result, metric, domain, collaboration, leadership, and transferable skill.
+3. Normalize the material into the structure in `references/resume-data-contract.md`. Preserve original wording alongside rewritten content so every modification remains traceable.
+4. Infer the target role's hiring signals from the company, role, and supplied job description: hard skills, tools, soft skills, domain terms, responsibilities, and seniority.
+5. Compare the job description with the resume using transparent exact and normalized keyword matching. Report matched terms, missing terms, evidence coverage, and information completeness. Never present a heuristic score as the target company's real ATS score.
+6. Read `references/aesthetic-effects-library.md` and choose one workplace-appropriate aesthetic profile. Prefer restrained, credible, scan-friendly styles over decorative or consumer-brand styles.
+7. Rewrite the resume content in a factual, evidence-first way. Present original and rewritten lines side by side or as a clear diff before applying changes. Do not fabricate degrees, employers, dates, certifications, revenue, awards, or metrics.
+8. Run a credibility, structural, and privacy audit. Validate required contact fields, dates, section completeness, unsupported superlatives, unverified metrics, personal contribution, and unnecessary sensitive data.
+9. Generate a single-page responsive HTML resume website unless the user asks for a different format. Detect likely one-page overflow, allow section reordering, and keep editing controls out of print output.
+10. Maintain one master resume with the user's complete evidence library. Derive and save independent company-role versions without overwriting the master.
+11. Keep resume data local by default. Include local persistence and JSON import/export so the user owns and can reuse their data.
+12. Run `scripts/evaluate_skill.py` after changing the skill or webpage and fix all failed checks.
+13. Save the webpage as an output artifact when working in a filesystem environment. Use a clear filename such as `resume-<company>-<role>.html`.
+14. Provide a concise summary of the positioning, selected visual style, match gaps, validation warnings, and any facts that need user confirmation.
 
 ## Resume Content Rules
 
@@ -59,6 +62,10 @@ Build a polished, professional page suitable for sending as a link or exporting 
 - Keep styling workplace-appropriate: calm color system, restrained accents, ample alignment, printable contrast, and no playful visual gimmicks.
 - Include `@media print` styles so the page prints cleanly to A4 or Letter.
 - Make the page responsive from mobile to desktop.
+- Parse imported files locally and disclose when scanned PDFs cannot produce selectable text.
+- Keep the master resume separate from company-specific variants.
+- Provide a reversible original-versus-rewritten review step.
+- Warn when the printable resume is likely to exceed one page.
 - Keep ATS-facing content in ordinary text and standard section headings; do not encode essential information only in icons, charts, progress bars, or decorative canvases.
 - Do not add visible instructions explaining how to use the page.
 - Do not use fake logos from the target company unless the user provides brand assets or explicitly asks for text-only mention.
@@ -71,6 +78,10 @@ Before final delivery, check:
 - The content is tailored to the target company and role instead of being generic.
 - All strong claims are grounded in user-provided facts or marked for confirmation.
 - Match analysis is explainable: show which supplied JD terms were found or missing and remind the user not to add skills they do not possess.
+- Imported PDF or DOCX text can be previewed before recognition.
+- Original text and rewritten text remain visibly traceable.
+- Saved company versions do not mutate the master resume.
+- Structural validation and the deterministic skill evaluation pass.
 - Sensitive personal data is excluded or explicitly flagged.
 - The page looks credible in a workplace setting and can be scanned by a recruiter within 30 seconds.
 - Text does not overflow buttons, cards, section headers, or mobile containers.

@@ -1,4 +1,4 @@
 interface:
   display_name: "Resume Polish Webpage"
-  short_description: "Turn experience into a polished resume webpage."
-  default_prompt: "Use $resume-polish-webpage to turn my experience, target company, and target role into a polished resume webpage."
+  short_description: "Import, tailor, compare, and validate resumes."
+  default_prompt: "Use $resume-polish-webpage to import my master resume, tailor it to a company and role, review each rewrite, and produce a validated resume webpage."

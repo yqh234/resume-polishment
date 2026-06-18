@@ -259,6 +259,185 @@
       line-height: 1.6;
     }
 
+    .workspace-panel {
+      margin: 18px 0;
+      padding: 15px;
+      border: 1px solid #ddd4c6;
+      background: rgba(255, 253, 250, .92);
+    }
+
+    .workspace-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .workspace-title strong {
+      color: #26352f;
+      font-size: 15px;
+    }
+
+    .workspace-title span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .compact-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .compact-row + .compact-row { margin-top: 8px; }
+
+    .compact-row select {
+      width: 100%;
+      min-width: 0;
+      min-height: 40px;
+      border: 1px solid #ded5c5;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 8px 10px;
+      font: inherit;
+    }
+
+    .compact-row button {
+      min-height: 40px;
+      padding: 8px 11px;
+      box-shadow: none;
+    }
+
+    .file-drop {
+      display: block;
+      padding: 14px;
+      border: 1px dashed #cdbda6;
+      background: #fffaf2;
+      color: #44524c;
+      cursor: pointer;
+      text-align: center;
+      line-height: 1.55;
+    }
+
+    .file-drop input { display: none; }
+
+    .file-drop b {
+      display: block;
+      color: #2d5d54;
+      margin-bottom: 2px;
+    }
+
+    .import-status {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .ats-preview {
+      display: none;
+      max-height: 230px;
+      margin-top: 10px;
+      padding: 12px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      border: 1px solid #e0d8cb;
+      background: #fff;
+      color: #38463f;
+      font: 12px/1.65 Consolas, "Microsoft YaHei", monospace;
+    }
+
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .compare-column label {
+      margin-top: 0;
+      font-size: 12px;
+    }
+
+    .compare-column textarea {
+      min-height: 190px;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .validation-list {
+      display: grid;
+      gap: 6px;
+      margin-top: 9px;
+    }
+
+    .validation-item {
+      padding: 7px 9px;
+      border-left: 3px solid #b88a55;
+      background: #fff9f0;
+      color: #625443;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .validation-item.ok {
+      border-left-color: #4b7e70;
+      background: #f3f8f5;
+      color: #36594f;
+    }
+
+    .editor-status {
+      max-width: 920px;
+      margin: 0 auto 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border: 1px solid #ddd4c6;
+      background: rgba(255, 253, 249, .9);
+      color: #4c5a54;
+      font-size: 13px;
+    }
+
+    .page-indicator {
+      font-weight: 800;
+      color: #2e675d;
+    }
+
+    .page-indicator.overflow { color: #9b5c36; }
+
+    .section { position: relative; }
+
+    .section-tools {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      display: flex;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity .15s ease;
+    }
+
+    .section:hover .section-tools,
+    .section:focus-within .section-tools { opacity: 1; }
+
+    .section-tools button {
+      width: 28px;
+      height: 28px;
+      min-height: 28px;
+      padding: 0;
+      border-radius: 4px;
+      border-color: #d8d0c4;
+      background: #fff;
+      color: #36584f;
+      box-shadow: none;
+      line-height: 1;
+    }
+
     .resume {
       max-width: 920px;
       margin: 0 auto;
@@ -563,6 +742,8 @@
       .row { grid-template-columns: 1fr; }
       .actions button { width: 100%; }
       .name { font-size: 28px; }
+      .compare-grid { grid-template-columns: 1fr; }
+      .editor-status { align-items: flex-start; flex-direction: column; }
     }
 
     @media print {
@@ -570,6 +751,7 @@
       aside { display: none; }
       main { padding: 0; }
       .app { display: block; min-height: auto; }
+      .editor-status, .section-tools { display: none !important; }
       .resume {
         border: 0;
         box-shadow: none;
@@ -586,6 +768,43 @@
     <aside>
       <h1>简历投递润色器</h1>
       <p class="subtitle">按岗位匹配、信息清楚、成果可信三条标准提问，把素材整理成可投递的简历正文。</p>
+
+      <section class="workspace-panel">
+        <div class="workspace-title">
+          <strong>简历版本</strong>
+          <span>母版保存完整经历，投递版按公司定制</span>
+        </div>
+        <div class="compact-row">
+          <select id="versionSelect" aria-label="选择简历版本">
+            <option value="">当前未保存草稿</option>
+          </select>
+          <button class="secondary" id="loadVersion">载入</button>
+        </div>
+        <div class="actions">
+          <button class="secondary" id="saveMaster">保存为母版</button>
+          <button class="secondary" id="newFromMaster">从母版新建</button>
+          <button class="secondary" id="saveVariant">保存公司版本</button>
+          <button class="secondary" id="deleteVersion">删除版本</button>
+        </div>
+      </section>
+
+      <section class="workspace-panel">
+        <div class="workspace-title">
+          <strong>导入旧简历</strong>
+          <span>PDF / DOCX / TXT，本地解析</span>
+        </div>
+        <label class="file-drop" for="resumeFile">
+          <b>选择简历文件</b>
+          导入后先查看ATS读取文本，再决定是否识别
+          <input id="resumeFile" type="file" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
+        </label>
+        <div class="import-status" id="importStatus">文件不会上传到服务器。</div>
+        <pre class="ats-preview" id="atsPreview"></pre>
+        <div class="actions">
+          <button class="secondary" id="useImportedText" disabled>使用识别文本</button>
+          <button class="secondary" id="toggleAtsPreview" disabled>展开ATS预览</button>
+        </div>
+      </section>
 
       <label for="rawProfile">一键识别素材</label>
       <textarea id="rawProfile">把你的经历、意向公司、目标岗位、岗位JD、教育背景、项目经历、技能证书等整段粘贴到这里。点击“识别并生成”后，我会自动拆分到下面的问题里。</textarea>
@@ -650,6 +869,28 @@ GPA / 排名 / 相关课程 / 奖项
         <div class="diagnostic-group"><b>已匹配</b><div class="mini-tags" id="matchedTerms"></div></div>
         <div class="diagnostic-group"><b>建议补充</b><div class="mini-tags" id="missingTerms"></div></div>
         <div class="diagnostic-note" id="auditNote">粘贴岗位 JD 和个人经历后，将生成可解释的投递前自检。</div>
+        <div class="validation-list" id="validationList"></div>
+      </section>
+
+      <section class="workspace-panel">
+        <div class="workspace-title">
+          <strong>原文与润色稿</strong>
+          <span>修改润色稿后再应用</span>
+        </div>
+        <div class="compare-grid">
+          <div class="compare-column">
+            <label for="originalCompare">原始经历</label>
+            <textarea id="originalCompare" readonly></textarea>
+          </div>
+          <div class="compare-column">
+            <label for="polishedCompare">润色结果</label>
+            <textarea id="polishedCompare"></textarea>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="secondary" id="applyPolished">应用润色稿</button>
+          <button class="secondary" id="resetPolished">恢复自动润色</button>
+        </div>
       </section>
 
       <div class="actions">
@@ -664,6 +905,10 @@ GPA / 排名 / 相关课程 / 奖项
     </aside>
 
     <main>
+      <div class="editor-status">
+        <span>章节右上角可调整顺序，顺序会随当前版本保存。</span>
+        <span class="page-indicator" id="pageIndicator">正在检查一页篇幅</span>
+      </div>
       <article class="resume" id="resume">
         <section class="hero">
           <div>
@@ -677,13 +922,13 @@ GPA / 排名 / 相关课程 / 奖项
         </section>
 
         <div class="resume-body">
-          <section class="section">
+          <section class="section" data-section="summary">
             <h2>个人优势</h2>
             <p class="summary" id="outSummary">具备清晰的业务理解、结构化执行和跨团队协作能力，能够围绕目标岗位要求，将项目经验转化为可落地的交付成果。</p>
             <div class="chips" id="outSkills"></div>
           </section>
 
-          <section class="section">
+          <section class="section" data-section="education">
             <h2>教育 / 背景</h2>
             <div class="item">
               <h3><span>待补充时间</span><span>教育背景或专业背景</span><span>待补充</span></h3>
@@ -691,7 +936,7 @@ GPA / 排名 / 相关课程 / 奖项
             </div>
           </section>
 
-          <section class="section">
+          <section class="section" data-section="work">
             <h2>工作经验</h2>
             <div class="item">
               <h3 id="outExperienceTitle"><span>近期经历</span><span>与目标岗位相关经历</span><span>核心贡献</span></h3>
@@ -699,12 +944,12 @@ GPA / 排名 / 相关课程 / 奖项
             </div>
           </section>
 
-          <section class="section">
+          <section class="section" data-section="projects">
             <h2>项目经验</h2>
             <div id="outMetrics"></div>
           </section>
 
-          <section class="section">
+          <section class="section" data-section="skills">
             <h2>技能关键词</h2>
             <div class="chips" id="outKeywords"></div>
           </section>
@@ -713,6 +958,8 @@ GPA / 排名 / 相关课程 / 奖项
     </main>
   </div>
 
+  <script src="resume-polish-vendor/pdf.min.js"></script>
+  <script src="resume-polish-vendor/mammoth.browser.min.js"></script>
   <script>
     const byId = (id) => document.getElementById(id);
 
@@ -817,11 +1064,12 @@ GPA / 排名 / 相关课程 / 奖项
       renderMiniTags("matchedTerms", matched);
       renderMiniTags("missingTerms", missing, true);
       byId("auditNote").textContent = warnings.join("；") + "。本结果是透明的关键词自检，不代表任何公司的真实 ATS 评分。";
+      renderValidation(data);
     }
 
     function formData() {
       return {
-        version: 1,
+        version: 2,
         raw: byId("rawProfile").value.trim(),
         candidate: byId("candidate").value.trim(),
         company: byId("company").value.trim(),
@@ -832,7 +1080,10 @@ GPA / 排名 / 相关课程 / 奖项
         education: byId("education").value.trim(),
         work: byId("work").value.trim(),
         projects: byId("projects").value.trim(),
-        skills: byId("skills").value.trim()
+        skills: byId("skills").value.trim(),
+        polished: byId("polishedCompare").value.trim(),
+        sectionOrder: getSectionOrder(),
+        updatedAt: new Date().toISOString()
       };
     }
 
@@ -842,6 +1093,8 @@ GPA / 排名 / 相关课程 / 奖项
           const key = id === "rawProfile" ? "raw" : id;
           if (typeof data[key] === "string") byId(id).value = data[key];
         });
+      if (typeof data.polished === "string") window.pendingPolished = data.polished;
+      if (Array.isArray(data.sectionOrder)) applySectionOrder(data.sectionOrder);
       updateCompanyAdvice();
       generate();
     }
@@ -850,6 +1103,220 @@ GPA / 排名 / 相关课程 / 奖项
       try {
         localStorage.setItem("resume-polish-draft-v1", JSON.stringify(formData()));
       } catch (_) {}
+    }
+
+    function renderValidation(data) {
+      const checks = [];
+      const contact = data.contact || "";
+      const hasPhone = /1[3-9]\d{9}|\+?\d[\d\s-]{7,}/.test(contact);
+      const hasEmail = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(contact);
+      checks.push([hasPhone && hasEmail, "联系方式包含手机和有效邮箱", "联系方式建议同时包含手机和有效邮箱"]);
+      checks.push([!/(候选人姓名|目标公司|目标岗位)/.test(`${data.candidate}${data.company}${data.role}`), "姓名、公司和岗位已填写", "姓名、公司或岗位仍保留示例占位符"]);
+      checks.push([/\b(19|20)\d{2}[.\-/年]?(0?[1-9]|1[0-2])?/.test(data.education + data.work + data.projects), "教育或经历包含明确时间", "教育或经历中建议提供明确时间"]);
+      checks.push([data.work.length + data.projects.length >= 80, "经历信息量足以支持初步润色", "工作和项目经历过短，建议补充个人动作、方法和结果"]);
+      checks.push([!/(身份证|银行卡|父母|婚姻状况|详细住址)/.test(data.raw), "未发现常见的无关敏感信息", "素材中可能包含身份证、银行卡、家庭或婚姻等无关隐私"]);
+      checks.push([!/(世界级|顶尖|卓越非凡|绝对领先)/.test(data.work + data.projects), "未发现明显绝对化表述", "存在难以验证的绝对化或夸张表达"]);
+      checks.push([new Set(data.sectionOrder || []).size === 5, "简历章节结构完整", "章节结构异常，请重新载入版本"]);
+
+      const container = byId("validationList");
+      container.innerHTML = "";
+      checks.forEach(([ok, passMessage, failMessage]) => {
+        const item = document.createElement("div");
+        item.className = `validation-item${ok ? " ok" : ""}`;
+        item.textContent = `${ok ? "通过" : "待检查"}：${ok ? passMessage : failMessage}`;
+        container.appendChild(item);
+      });
+    }
+
+    function getSectionOrder() {
+      return Array.from(document.querySelectorAll(".resume-body > .section"))
+        .map(section => section.dataset.section);
+    }
+
+    function applySectionOrder(order) {
+      const body = document.querySelector(".resume-body");
+      order.forEach(key => {
+        const section = body.querySelector(`[data-section="${key}"]`);
+        if (section) body.appendChild(section);
+      });
+    }
+
+    function moveSection(section, direction) {
+      const sibling = direction < 0 ? section.previousElementSibling : section.nextElementSibling;
+      if (!sibling || !sibling.classList.contains("section")) return;
+      if (direction < 0) section.parentNode.insertBefore(section, sibling);
+      else section.parentNode.insertBefore(sibling, section);
+      saveDraft();
+      schedulePageCheck();
+    }
+
+    function setupSectionTools() {
+      document.querySelectorAll(".resume-body > .section").forEach(section => {
+        if (section.querySelector(".section-tools")) return;
+        const tools = document.createElement("div");
+        tools.className = "section-tools";
+        tools.innerHTML = `
+          <button type="button" title="上移章节" aria-label="上移章节">▲</button>
+          <button type="button" title="下移章节" aria-label="下移章节">▼</button>`;
+        const buttons = tools.querySelectorAll("button");
+        buttons[0].addEventListener("click", () => moveSection(section, -1));
+        buttons[1].addEventListener("click", () => moveSection(section, 1));
+        section.appendChild(tools);
+      });
+    }
+
+    function schedulePageCheck() {
+      requestAnimationFrame(() => requestAnimationFrame(checkPageOverflow));
+    }
+
+    function checkPageOverflow() {
+      const resume = byId("resume");
+      const printableHeight = 1120;
+      const pages = Math.max(1, Math.ceil(resume.scrollHeight / printableHeight));
+      const indicator = byId("pageIndicator");
+      indicator.classList.toggle("overflow", pages > 1);
+      indicator.textContent = pages > 1
+        ? `预计 ${pages} 页：内容超过一页，建议删减次要信息`
+        : "预计 1 页：篇幅适合快速投递";
+    }
+
+    const libraryKey = "resume-polish-library-v2";
+    let currentVersionId = "";
+
+    function getLibrary() {
+      try {
+        return JSON.parse(localStorage.getItem(libraryKey)) || { master: null, variants: {} };
+      } catch (_) {
+        return { master: null, variants: {} };
+      }
+    }
+
+    function setLibrary(library) {
+      localStorage.setItem(libraryKey, JSON.stringify(library));
+      refreshVersionSelect();
+    }
+
+    function versionLabel(data, prefix = "") {
+      const company = data.company && data.company !== "目标公司" ? data.company : "未命名公司";
+      const role = data.role && data.role !== "目标岗位" ? data.role : "未命名岗位";
+      return `${prefix}${company} / ${role}`;
+    }
+
+    function refreshVersionSelect(selected = currentVersionId) {
+      const library = getLibrary();
+      const select = byId("versionSelect");
+      select.innerHTML = '<option value="">当前未保存草稿</option>';
+      if (library.master) {
+        const option = document.createElement("option");
+        option.value = "master";
+        option.textContent = "母版简历";
+        select.appendChild(option);
+      }
+      Object.entries(library.variants || {})
+        .sort((a, b) => (b[1].updatedAt || "").localeCompare(a[1].updatedAt || ""))
+        .forEach(([id, data]) => {
+          const option = document.createElement("option");
+          option.value = id;
+          option.textContent = versionLabel(data);
+          select.appendChild(option);
+        });
+      select.value = selected && select.querySelector(`option[value="${CSS.escape(selected)}"]`) ? selected : "";
+    }
+
+    function saveMaster() {
+      const library = getLibrary();
+      library.master = formData();
+      currentVersionId = "master";
+      setLibrary(library);
+      byId("saveMaster").textContent = "母版已保存";
+      setTimeout(() => byId("saveMaster").textContent = "保存为母版", 1200);
+    }
+
+    function saveVariant() {
+      const library = getLibrary();
+      const data = formData();
+      let id = currentVersionId && currentVersionId !== "master" ? currentVersionId : "";
+      if (!id) id = `variant-${Date.now()}`;
+      library.variants[id] = data;
+      currentVersionId = id;
+      setLibrary(library);
+      byId("saveVariant").textContent = "公司版本已保存";
+      setTimeout(() => byId("saveVariant").textContent = "保存公司版本", 1200);
+    }
+
+    function newFromMaster() {
+      const library = getLibrary();
+      if (!library.master) {
+        byId("auditNote").textContent = "请先保存一份母版简历，再从母版创建公司投递版本。";
+        return;
+      }
+      const data = { ...library.master, company: "", role: "", jd: "", polished: "" };
+      currentVersionId = "";
+      applyFormData(data);
+      byId("company").focus();
+    }
+
+    function loadSelectedVersion() {
+      const id = byId("versionSelect").value;
+      if (!id) return;
+      const library = getLibrary();
+      const data = id === "master" ? library.master : library.variants[id];
+      if (!data) return;
+      currentVersionId = id;
+      applyFormData(data);
+    }
+
+    function deleteSelectedVersion() {
+      const id = byId("versionSelect").value;
+      if (!id) return;
+      const library = getLibrary();
+      if (id === "master") library.master = null;
+      else delete library.variants[id];
+      currentVersionId = "";
+      setLibrary(library);
+    }
+
+    async function extractPdfText(arrayBuffer) {
+      if (!window.pdfjsLib) throw new Error("PDF解析组件未加载");
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "resume-polish-vendor/pdf.worker.min.js";
+      const documentTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
+      const pdf = await documentTask.promise;
+      const pages = [];
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+        const page = await pdf.getPage(pageNumber);
+        const content = await page.getTextContent();
+        pages.push(content.items.map(item => item.str).join(" "));
+      }
+      return pages.join("\n\n");
+    }
+
+    async function extractResumeText(file) {
+      const extension = file.name.split(".").pop().toLowerCase();
+      if (extension === "pdf") return extractPdfText(await file.arrayBuffer());
+      if (extension === "docx") {
+        if (!window.mammoth) throw new Error("DOCX解析组件未加载");
+        const result = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+        return result.value;
+      }
+      if (extension === "txt") return file.text();
+      throw new Error("暂不支持该文件格式");
+    }
+
+    async function handleResumeFile(file) {
+      byId("importStatus").textContent = `正在本地解析 ${file.name}…`;
+      byId("useImportedText").disabled = true;
+      byId("toggleAtsPreview").disabled = true;
+      try {
+        const text = (await extractResumeText(file)).replace(/\u0000/g, "").trim();
+        if (!text) throw new Error("文件中没有读取到可用文本，可能是扫描图片PDF");
+        window.importedResumeText = text;
+        byId("atsPreview").textContent = text;
+        byId("importStatus").textContent = `已读取 ${text.length} 个字符。请检查ATS预览是否完整。`;
+        byId("useImportedText").disabled = false;
+        byId("toggleAtsPreview").disabled = false;
+      } catch (error) {
+        byId("importStatus").textContent = `解析失败：${error.message}`;
+      }
     }
 
     function companyStyleAdvice(company, role) {
@@ -968,6 +1435,12 @@ GPA / 排名 / 相关课程 / 奖项
       return `围绕${company} ${role}的岗位要求，完成${normalized}，体现出问题拆解、协作推进与结果交付能力。`;
     }
 
+    function renderPolishedBullets(text) {
+      const lines = cleanLines(text).slice(0, 6);
+      byId("outBullets").innerHTML = lines.map(line => `<li>${line}</li>`).join("");
+      schedulePageCheck();
+    }
+
     function renderChips(container, items) {
       container.innerHTML = "";
       items.forEach(item => {
@@ -1016,6 +1489,11 @@ GPA / 排名 / 相关课程 / 奖项
       const skills = styleSkills[style];
       const keywords = keywordList([jd, skillText].join("\n"), skills);
       const bullets = (lines.length ? lines : ["梳理业务问题并推动解决方案落地", "协调相关方完成项目交付", "复盘项目结果并沉淀方法"]).slice(0, 6);
+      const autoPolished = bullets.map(x => polishedBullet(x, role, company)).join("\n");
+      const polished = typeof window.pendingPolished === "string" && window.pendingPolished
+        ? window.pendingPolished
+        : autoPolished;
+      window.pendingPolished = "";
 
       document.body.dataset.style = style;
       byId("outName").textContent = candidate;
@@ -1036,13 +1514,45 @@ GPA / 排名 / 相关课程 / 奖项
         proofBrief ? `成果证据：${proofBrief}` : "成果可信度：建议补充数据量、效率、准确率、用户数、排名或项目规模。"
       ];
       byId("outHighlights").innerHTML = highlights.map(x => `<li>${x}</li>`).join("");
-      byId("outBullets").innerHTML = bullets.map(x => `<li>${polishedBullet(x, role, company)}</li>`).join("");
+      byId("originalCompare").value = bullets.join("\n");
+      byId("polishedCompare").value = polished;
+      renderPolishedBullets(polished);
       analyzeResume(formData());
       saveDraft();
+      schedulePageCheck();
     }
 
     byId("autoGenerate").addEventListener("click", autoRecognize);
     byId("generate").addEventListener("click", generate);
+    byId("resumeFile").addEventListener("change", event => {
+      const file = event.target.files && event.target.files[0];
+      if (file) handleResumeFile(file);
+    });
+    byId("toggleAtsPreview").addEventListener("click", () => {
+      const preview = byId("atsPreview");
+      const opening = preview.style.display !== "block";
+      preview.style.display = opening ? "block" : "none";
+      byId("toggleAtsPreview").textContent = opening ? "收起ATS预览" : "展开ATS预览";
+    });
+    byId("useImportedText").addEventListener("click", () => {
+      if (!window.importedResumeText) return;
+      byId("rawProfile").value = window.importedResumeText;
+      autoRecognize();
+    });
+    byId("applyPolished").addEventListener("click", () => {
+      renderPolishedBullets(byId("polishedCompare").value);
+      saveDraft();
+    });
+    byId("resetPolished").addEventListener("click", () => {
+      window.pendingPolished = "";
+      generate();
+    });
+    byId("saveMaster").addEventListener("click", saveMaster);
+    byId("newFromMaster").addEventListener("click", newFromMaster);
+    byId("saveVariant").addEventListener("click", saveVariant);
+    byId("loadVersion").addEventListener("click", loadSelectedVersion);
+    byId("deleteVersion").addEventListener("click", deleteSelectedVersion);
+    byId("versionSelect").addEventListener("change", loadSelectedVersion);
     byId("company").addEventListener("input", updateCompanyAdvice);
     byId("role").addEventListener("input", updateCompanyAdvice);
     byId("photoInput").addEventListener("change", (event) => {
@@ -1083,12 +1593,20 @@ GPA / 排名 / 相关课程 / 奖项
     document.querySelectorAll("aside input:not([type=file]), aside textarea").forEach(field => {
       field.addEventListener("input", saveDraft);
     });
+    setupSectionTools();
+    refreshVersionSelect();
+    let restoredDraft = false;
     try {
       const draft = JSON.parse(localStorage.getItem("resume-polish-draft-v1"));
-      if (draft && draft.version === 1) applyFormData(draft);
+      if (draft && (draft.version === 1 || draft.version === 2)) {
+        applyFormData(draft);
+        restoredDraft = true;
+      }
     } catch (_) {}
     updateCompanyAdvice();
-    generate();
+    if (!restoredDraft) generate();
+    if ("ResizeObserver" in window) new ResizeObserver(schedulePageCheck).observe(byId("resume"));
+    window.addEventListener("resize", schedulePageCheck);
   </script>
 </body>
 </html>
