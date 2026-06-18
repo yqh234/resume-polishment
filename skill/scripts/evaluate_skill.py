@@ -32,6 +32,10 @@ def main() -> int:
         "overflow detection": 'id="pageIndicator"' in html and "checkPageOverflow" in html,
         "master storage": "resume-polish-library-v2" in html and "saveMaster" in html,
         "structural validation": "renderValidation" in html,
+        "layout-aware PDF parsing": "item.transform" in html and "rows.sort" in html,
+        "preview fingerprint": "polishPreviewFingerprint" in html and "sourceFingerprint" in html,
+        "bounded enrichment": "renderEnrichmentQuestions" in html and ".slice(0, 6)" in html,
+        "master evidence alignment": "unsupportedSkills" in html and "masterEvidence" in html,
     }
 
     failed = [name for name, passed in checks.items() if not passed]

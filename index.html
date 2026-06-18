@@ -374,6 +374,26 @@
       margin-top: 9px;
     }
 
+    .question-list {
+      display: grid;
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .question-item {
+      padding: 9px 10px;
+      border: 1px solid #e3ddd4;
+      background: #fff;
+      color: #425048;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .question-item b {
+      color: #2e675d;
+      margin-right: 5px;
+    }
+
     .validation-item {
       padding: 7px 9px;
       border-left: 3px solid #b88a55;
@@ -870,6 +890,7 @@ GPA / 排名 / 相关课程 / 奖项
         <div class="diagnostic-group"><b>建议补充</b><div class="mini-tags" id="missingTerms"></div></div>
         <div class="diagnostic-note" id="auditNote">粘贴岗位 JD 和个人经历后，将生成可解释的投递前自检。</div>
         <div class="validation-list" id="validationList"></div>
+        <div class="diagnostic-group"><b>建议补充的问题</b><div class="question-list" id="enrichmentQuestions"></div></div>
       </section>
 
       <section class="workspace-panel">
@@ -989,8 +1010,22 @@ GPA / 排名 / 相关课程 / 奖项
     function cleanLines(text) {
       return text
         .split(/\n|；|;/)
-        .map(line => line.replace(/^[-*•\d.\s]+/, "").trim())
+        .map(line => line.replace(/[\uE000-\uF8FF]/g, "").replace(/^[-*•\d.\s]+/, "").trim())
         .filter(Boolean);
+    }
+
+    function compactContact(phone, email, city) {
+      return Array.from(new Set([phone, email, city].filter(Boolean))).join(" / ");
+    }
+
+    function sourceFingerprint(data) {
+      const source = [data.raw, data.company, data.role, data.jd, data.work, data.projects].join("\u241f");
+      let hash = 2166136261;
+      for (let index = 0; index < source.length; index += 1) {
+        hash ^= source.charCodeAt(index);
+        hash = Math.imul(hash, 16777619);
+      }
+      return (hash >>> 0).toString(16);
     }
 
     function keywordList(text, fallback) {
@@ -1056,6 +1091,12 @@ GPA / 排名 / 相关课程 / 奖项
       if (/(身份证|身份证号|家庭住址|父母|婚姻状况|银行卡)/.test(data.raw)) warnings.push("原始素材可能包含不建议写入简历的隐私信息");
       if (/精通/.test(data.skills) && !/年|项目|次|个|套/.test(data.skills + data.work + data.projects)) warnings.push("“精通”缺少经历证据，建议改为具体应用场景");
       if (missing.length) warnings.push("优先核对 JD 中的缺失词，不会的技能不要为了分数硬加");
+      const library = getLibrary();
+      if (library.master && currentVersionId !== "master") {
+        const masterEvidence = [library.master.raw, library.master.work, library.master.projects, library.master.skills].join("\n").toLowerCase();
+        const unsupportedSkills = normalizedTerms(data.skills).filter(term => !masterEvidence.includes(term.toLowerCase()));
+        if (unsupportedSkills.length) warnings.push(`当前投递版出现母版中未找到证据的技能：${unsupportedSkills.slice(0, 4).join("、")}`);
+      }
       if (!warnings.length) warnings.push("结构较完整，提交前仍需逐条确认数据和个人贡献可经受面试追问");
 
       byId("matchScore").textContent = `${match}%`;
@@ -1065,6 +1106,30 @@ GPA / 排名 / 相关课程 / 奖项
       renderMiniTags("missingTerms", missing, true);
       byId("auditNote").textContent = warnings.join("；") + "。本结果是透明的关键词自检，不代表任何公司的真实 ATS 评分。";
       renderValidation(data);
+      renderEnrichmentQuestions(data);
+    }
+
+    function renderEnrichmentQuestions(data) {
+      const experience = `${data.work}\n${data.projects}`;
+      const questions = [];
+      if (!/\d+|%|百分/.test(experience)) questions.push("这段经历涉及多少客户、用户、数据、模块、文档或团队成员？");
+      if (!/提升|降低|缩短|增长|节省|达成|完成|准确率|转化/.test(experience)) questions.push("完成这项工作后，效率、质量、收入、成本或用户体验发生了什么变化？");
+      if (!/使用|通过|基于|借助|采用|Python|Excel|SQL|系统|平台|工具/.test(experience)) questions.push("你具体使用了哪些工具、方法、流程或专业知识？");
+      if (!/独立|主导|负责|协调|参与|协助/.test(experience)) questions.push("你在团队中的个人职责是什么，哪些部分由你独立完成？");
+      if (!/客户|用户|团队|部门|供应商|老师|同学|成员/.test(experience)) questions.push("你与哪些对象协作，如何沟通需求、处理分歧或推进交付？");
+      if (!/\b(19|20)\d{2}[.\-/年]/.test(experience)) questions.push("这段经历发生在什么时间，持续了多久？");
+      if (normalizedTerms(data.jd).length && byId("missingTerms").children.length > 1) questions.push("JD 中尚未匹配的要求里，哪些是你真实做过但还没有写进简历的？");
+
+      const container = byId("enrichmentQuestions");
+      container.innerHTML = "";
+      (questions.length ? questions : ["当前素材较完整，请逐条确认数字、个人贡献和结果均可在面试中解释。"])
+        .slice(0, 6)
+        .forEach((question, index) => {
+          const item = document.createElement("div");
+          item.className = "question-item";
+          item.innerHTML = `<b>${index + 1}.</b>${question}`;
+          container.appendChild(item);
+        });
     }
 
     function formData() {
@@ -1285,7 +1350,23 @@ GPA / 排名 / 相关课程 / 奖项
       for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
         const page = await pdf.getPage(pageNumber);
         const content = await page.getTextContent();
-        pages.push(content.items.map(item => item.str).join(" "));
+        const rows = [];
+        content.items
+          .filter(item => item.str && item.str.trim())
+          .forEach(item => {
+            const x = item.transform?.[4] || 0;
+            const y = item.transform?.[5] || 0;
+            let row = rows.find(candidate => Math.abs(candidate.y - y) < 2.5);
+            if (!row) {
+              row = { y, items: [] };
+              rows.push(row);
+            }
+            row.items.push({ x, text: item.str.trim() });
+          });
+        rows.sort((a, b) => b.y - a.y);
+        pages.push(rows
+          .map(row => row.items.sort((a, b) => a.x - b.x).map(item => item.text).join(" "))
+          .join("\n"));
       }
       return pages.join("\n\n");
     }
@@ -1365,7 +1446,7 @@ GPA / 排名 / 相关课程 / 奖项
       if (!starts.length) return "";
       const start = Math.min(...starts);
       const end = lines.findIndex((line, index) =>
-        index > start && /^(基本信息|教育背景|教育经历|实习经历|工作经历|工作经验|项目经历|项目经验|技能证书|专业技能|个人技能|证书奖项|荣誉奖项|求职意向|岗位要求|任职要求|JD|自我评价)[:：]?$/.test(line.trim())
+        index > start && /^(基本信息|教育背景|教育经历|实习经历|工作经历|工作经验|项目经历|项目经验|校园经历|社会实践|技能证书|专业技能|个人技能|证书奖项|荣誉证书|荣誉奖项|求职意向|岗位要求|任职要求|JD|自我评价)[:：]?$/.test(line.trim())
       );
       return lines.slice(start + 1, end > start ? end : lines.length).join("\n").trim();
     }
@@ -1386,9 +1467,10 @@ GPA / 排名 / 相关课程 / 奖项
       const email = firstMatch(raw, [/([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})/]);
       const city = firstMatch(raw, [/(北京|上海|广州|深圳|杭州|南京|苏州|成都|武汉|西安|天津|重庆|常州|无锡|合肥|长沙|郑州|青岛|厦门|宁波|珠海|佛山)/]);
       const name = firstMatch(raw, [
-        /姓名[:：\s]*([\u4e00-\u9fa5]{2,4})/,
+        /姓\s*名[:：\s]*([\u4e00-\u9fa5\s]{2,8})/,
+        /^([\u4e00-\u9fa5]\s*[\u4e00-\u9fa5]\s*[\u4e00-\u9fa5]?)$/m,
         /^([\u4e00-\u9fa5]{2,4})$/m
-      ], byId("candidate").value.trim());
+      ], byId("candidate").value.trim()).replace(/\s+/g, "");
       const role = firstMatch(raw, [
         /求职(?:意向|岗位)[:：\s]*([^\n｜|]{2,30})/,
         /应聘(?:岗位)?[:：\s]*([^\n｜|]{2,30})/,
@@ -1404,7 +1486,7 @@ GPA / 排名 / 相关课程 / 奖项
       const education = extractBlock(raw, ["教育背景", "教育经历"]) || cleanLines(raw).filter(line => /大学|学院|本科|硕士|博士|GPA|专业|主修课程|排名/.test(line)).slice(0, 6).join("\n");
       const work = extractBlock(raw, ["工作经验", "工作经历", "实习经历"]) || cleanLines(raw).filter(line => /公司|机构|实习|负责|参与|协助|推动|完成|客户|用户|销售|运营|市场|财务|人力|行政|教育|设计|内容|采购|供应链|提升|降低|优化/.test(line)).slice(0, 8).join("\n");
       const projects = extractBlock(raw, ["项目经验", "项目经历"]) || cleanLines(raw).filter(line => /项目|课题|比赛|作品|案例|活动|方案|设计|系统|模型|调研|分析|策划|执行|复盘|开发|调试|模块/.test(line)).slice(0, 10).join("\n");
-      const skills = extractBlock(raw, ["技能证书", "专业技能", "个人技能", "证书奖项", "荣誉奖项"]) || cleanLines(raw).filter(line => /Python|MATLAB|C\+\+|C语言|Java|SQL|Excel|PPT|Word|PowerPoint|SPSS|Tableau|Photoshop|PS|剪辑|英语|CET|雅思|托福|证书|奖|资格|普通话|教师资格|会计|CPA|法律/.test(line)).slice(0, 8).join("\n");
+      const skills = extractBlock(raw, ["技能证书", "专业技能", "个人技能", "证书奖项", "荣誉证书", "荣誉奖项"]) || cleanLines(raw).filter(line => /Python|MATLAB|C\+\+|C语言|Java|SQL|Excel|PPT|Word|PowerPoint|SPSS|Tableau|Photoshop|PS|剪辑|英语|CET|雅思|托福|证书|奖|资格|普通话|教师资格|会计|CPA|法律/.test(line)).slice(0, 8).join("\n");
       const proof = cleanLines(raw)
         .filter(line => /\d+|%|百分|提升|降低|缩短|准确率|排名|奖|用户|客户|模块|文档|数据/.test(line))
         .filter(line => !/电话|手机|邮箱|@|大学|学院|本科|硕士|博士|GPA|主修课程/.test(line))
@@ -1415,7 +1497,7 @@ GPA / 排名 / 相关课程 / 奖项
       if (name) byId("candidate").value = name;
       if (company) byId("company").value = company;
       if (role) byId("role").value = role;
-      byId("contact").value = [phone, email, city].filter(Boolean).join(" / ") || byId("contact").value;
+      byId("contact").value = compactContact(phone, email, city) || byId("contact").value;
       if (jd) byId("jd").value = jd;
       if (education) byId("education").value = education;
       if (work) byId("work").value = work;
@@ -1494,6 +1576,14 @@ GPA / 排名 / 相关课程 / 奖项
         ? window.pendingPolished
         : autoPolished;
       window.pendingPolished = "";
+      window.polishPreviewFingerprint = sourceFingerprint({
+        raw: byId("rawProfile").value,
+        company,
+        role,
+        jd,
+        work,
+        projects
+      });
 
       document.body.dataset.style = style;
       byId("outName").textContent = candidate;
@@ -1540,8 +1630,14 @@ GPA / 排名 / 相关课程 / 奖项
       autoRecognize();
     });
     byId("applyPolished").addEventListener("click", () => {
+      const currentFingerprint = sourceFingerprint(formData());
+      if (window.polishPreviewFingerprint !== currentFingerprint) {
+        byId("auditNote").textContent = "原始素材、公司、岗位或JD已发生变化。为避免把旧建议应用到新内容，请先点击“生成简历”重新预览。";
+        return;
+      }
       renderPolishedBullets(byId("polishedCompare").value);
       saveDraft();
+      byId("auditNote").textContent = "润色稿已确认应用。原始经历仍保留在左侧，可随时重新生成或恢复。";
     });
     byId("resetPolished").addEventListener("click", () => {
       window.pendingPolished = "";

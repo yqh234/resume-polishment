@@ -9,7 +9,7 @@ description: Generate a polished, job-application-ready resume webpage and resum
 
 Turn raw career experience into a tailored resume webpage with professional visual styling and application-ready copy. Require the user to provide their experience, target company, and target role before producing the final resume.
 
-When extending the tool's data model, privacy behavior, matching logic, imports, or versioning, read `references/github-benchmarks.md` and `references/resume-data-contract.md`.
+When extending the tool's data model, privacy behavior, matching logic, imports, versioning, or rewrite safety, read `references/github-benchmarks.md`, `references/resume-data-contract.md`, and `references/resume-matcher-lessons.md`.
 
 ## Required Inputs
 
@@ -29,14 +29,15 @@ If the user gives only a brief experience, ask up to five focused follow-up ques
 4. Infer the target role's hiring signals from the company, role, and supplied job description: hard skills, tools, soft skills, domain terms, responsibilities, and seniority.
 5. Compare the job description with the resume using transparent exact and normalized keyword matching. Report matched terms, missing terms, evidence coverage, and information completeness. Never present a heuristic score as the target company's real ATS score.
 6. Read `references/aesthetic-effects-library.md` and choose one workplace-appropriate aesthetic profile. Prefer restrained, credible, scan-friendly styles over decorative or consumer-brand styles.
-7. Rewrite the resume content in a factual, evidence-first way. Present original and rewritten lines side by side or as a clear diff before applying changes. Do not fabricate degrees, employers, dates, certifications, revenue, awards, or metrics.
-8. Run a credibility, structural, and privacy audit. Validate required contact fields, dates, section completeness, unsupported superlatives, unverified metrics, personal contribution, and unnecessary sensitive data.
-9. Generate a single-page responsive HTML resume website unless the user asks for a different format. Detect likely one-page overflow, allow section reordering, and keep editing controls out of print output.
-10. Maintain one master resume with the user's complete evidence library. Derive and save independent company-role versions without overwriting the master.
-11. Keep resume data local by default. Include local persistence and JSON import/export so the user owns and can reuse their data.
-12. Run `scripts/evaluate_skill.py` after changing the skill or webpage and fix all failed checks.
-13. Save the webpage as an output artifact when working in a filesystem environment. Use a clear filename such as `resume-<company>-<role>.html`.
-14. Provide a concise summary of the positioning, selected visual style, match gaps, validation warnings, and any facts that need user confirmation.
+7. Rewrite the resume content in a factual, evidence-first way. Generate changes against an immutable source snapshot, present original and rewritten lines side by side, and invalidate the preview if the source changes before confirmation. Never allow rewrite operations to modify identity, employer, institution, dates, degrees, or other protected facts.
+8. When material is weak, ask no more than six high-value questions about scope, measurable result, tools, individual contribution, collaboration, and duration. Preserve the original bullet and append confirmed evidence instead of silently replacing it.
+9. Run a credibility, structural, master-alignment, and privacy audit. Validate required contact fields, dates, section completeness, unsupported superlatives, unverified metrics, personal contribution, unnecessary sensitive data, and any skill absent from the master evidence.
+10. Generate a single-page responsive HTML resume website unless the user asks for a different format. Detect likely one-page overflow, allow section reordering, and keep editing controls out of print output.
+11. Maintain one master resume with the user's complete evidence library. Derive and save independent company-role versions without overwriting the master.
+12. Keep resume data local by default. Include local persistence and JSON import/export so the user owns and can reuse their data.
+13. Run `scripts/evaluate_skill.py` after changing the skill or webpage and fix all failed checks.
+14. Save the webpage as an output artifact when working in a filesystem environment. Use a clear filename such as `resume-<company>-<role>.html`.
+15. Provide a concise summary of the positioning, selected visual style, match gaps, validation warnings, and any facts that need user confirmation.
 
 ## Resume Content Rules
 
@@ -80,7 +81,10 @@ Before final delivery, check:
 - Match analysis is explainable: show which supplied JD terms were found or missing and remind the user not to add skills they do not possess.
 - Imported PDF or DOCX text can be previewed before recognition.
 - Original text and rewritten text remain visibly traceable.
+- A rewrite preview becomes invalid if its source content changes before confirmation.
+- Enrichment asks at most six targeted questions and does not silently replace original evidence.
 - Saved company versions do not mutate the master resume.
+- Skills added to a tailored version are checked against the master evidence.
 - Structural validation and the deterministic skill evaluation pass.
 - Sensitive personal data is excluded or explicitly flagged.
 - The page looks credible in a workplace setting and can be scanned by a recruiter within 30 seconds.
