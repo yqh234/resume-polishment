@@ -9,6 +9,8 @@ description: Generate a polished, job-application-ready resume webpage and resum
 
 Turn raw career experience into a tailored resume webpage with professional visual styling and application-ready copy. Require the user to provide their experience, target company, and target role before producing the final resume.
 
+When extending the tool's data model, privacy behavior, or matching logic, read `references/github-benchmarks.md`.
+
 ## Required Inputs
 
 Ask for missing information before final generation if any of these are absent:
@@ -22,12 +24,16 @@ If the user gives only a brief experience, ask up to five focused follow-up ques
 ## Workflow
 
 1. Parse the user's raw experience into evidence units: responsibility, action, tool/method, result, metric, domain, collaboration, leadership, and transferable skill.
-2. Infer the target role's hiring signals from the company and role: required skills, seniority, domain vocabulary, behavioral traits, and likely ATS keywords.
-3. Read `references/aesthetic-effects-library.md` and choose one workplace-appropriate aesthetic profile. Prefer restrained, credible, scan-friendly styles over decorative or consumer-brand styles.
-4. Rewrite the resume content in a factual, evidence-first way. Do not fabricate degrees, employers, dates, certifications, revenue, awards, or metrics. If a strong metric is missing, phrase the impact qualitatively or mark a placeholder for user confirmation.
-5. Generate a single-page responsive HTML resume website unless the user asks for a different format. Include embedded CSS and no external build step unless the surrounding project already uses one.
-6. Save the webpage as an output artifact when working in a filesystem environment. Use a clear filename such as `resume-<company>-<role>.html`.
-7. Provide a concise summary of the positioning, selected visual style, and any facts that need user confirmation.
+2. Normalize the material into a reusable structure inspired by JSON Resume: basics, work, projects, education, skills, certificates, and target role metadata. Preserve the user's original wording alongside rewritten content when traceability matters.
+3. Infer the target role's hiring signals from the company, role, and supplied job description: hard skills, tools, soft skills, domain terms, responsibilities, and seniority.
+4. Compare the job description with the resume using transparent exact and normalized keyword matching. Report matched terms, missing terms, evidence coverage, and information completeness. Never present a heuristic score as the target company's real ATS score.
+5. Read `references/aesthetic-effects-library.md` and choose one workplace-appropriate aesthetic profile. Prefer restrained, credible, scan-friendly styles over decorative or consumer-brand styles.
+6. Rewrite the resume content in a factual, evidence-first way. Do not fabricate degrees, employers, dates, certifications, revenue, awards, or metrics. If a strong metric is missing, phrase the impact qualitatively or mark a placeholder for user confirmation.
+7. Run a credibility and privacy audit. Flag unsupported superlatives, unverified metrics, unclear personal contribution, and unnecessary sensitive data such as identity numbers, family details, marital status, or exact home address.
+8. Generate a single-page responsive HTML resume website unless the user asks for a different format. Include embedded CSS and no external build step unless the surrounding project already uses one.
+9. Keep resume data local by default. When useful, include local draft persistence and JSON import/export so the user owns and can reuse their data.
+10. Save the webpage as an output artifact when working in a filesystem environment. Use a clear filename such as `resume-<company>-<role>.html`.
+11. Provide a concise summary of the positioning, selected visual style, match gaps, and any facts that need user confirmation.
 
 ## Resume Content Rules
 
@@ -53,6 +59,7 @@ Build a polished, professional page suitable for sending as a link or exporting 
 - Keep styling workplace-appropriate: calm color system, restrained accents, ample alignment, printable contrast, and no playful visual gimmicks.
 - Include `@media print` styles so the page prints cleanly to A4 or Letter.
 - Make the page responsive from mobile to desktop.
+- Keep ATS-facing content in ordinary text and standard section headings; do not encode essential information only in icons, charts, progress bars, or decorative canvases.
 - Do not add visible instructions explaining how to use the page.
 - Do not use fake logos from the target company unless the user provides brand assets or explicitly asks for text-only mention.
 - Do not include decorative stock photos unless they directly support the professional context.
@@ -63,6 +70,8 @@ Before final delivery, check:
 
 - The content is tailored to the target company and role instead of being generic.
 - All strong claims are grounded in user-provided facts or marked for confirmation.
+- Match analysis is explainable: show which supplied JD terms were found or missing and remind the user not to add skills they do not possess.
+- Sensitive personal data is excluded or explicitly flagged.
 - The page looks credible in a workplace setting and can be scanned by a recruiter within 30 seconds.
 - Text does not overflow buttons, cards, section headers, or mobile containers.
 - The final answer tells the user where the HTML file was saved and lists any assumptions.

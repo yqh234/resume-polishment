@@ -18,5 +18,10 @@ The page can:
 - Recognize common resume fields from long pasted text.
 - Suggest company-specific resume style research links.
 - Adapt positioning for different role families.
+- Compare resume content with a supplied JD using transparent matched and missing keywords.
+- Audit evidence coverage, information completeness, unsupported claims, and sensitive personal data.
+- Save drafts locally and import or export reusable JSON resume data without uploading it.
 - Preview a formal resume layout with optional photo upload.
 - Copy the generated resume text or print/export to PDF.
+
+The matching percentage is an explainable pre-submission self-check, not a claim about any company's real ATS score.

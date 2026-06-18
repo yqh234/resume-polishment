@@ -179,6 +179,86 @@
       border-bottom-color: #24565f;
     }
 
+    .diagnostic {
+      margin-top: 18px;
+      padding: 16px;
+      border: 1px solid #ddd4c6;
+      background: #fffdfa;
+    }
+
+    .diagnostic-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .diagnostic-head strong { color: #26352f; font-size: 15px; }
+    .diagnostic-head span { color: var(--muted); font-size: 12px; }
+
+    .score-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .score-box {
+      min-width: 0;
+      padding: 9px 8px;
+      border: 1px solid #e3ddd4;
+      background: #fff;
+      text-align: center;
+    }
+
+    .score-box b {
+      display: block;
+      color: #2e675d;
+      font-size: 19px;
+      line-height: 1.2;
+    }
+
+    .score-box span { color: var(--muted); font-size: 11px; }
+
+    .diagnostic-group {
+      margin-top: 10px;
+      color: #46534d;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .diagnostic-group b { color: #26352f; }
+
+    .mini-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 5px;
+    }
+
+    .mini-tag {
+      padding: 3px 7px;
+      border: 1px solid #d7e1dc;
+      background: #f4f8f6;
+      color: #315d55;
+    }
+
+    .mini-tag.missing {
+      border-color: #ead7bd;
+      background: #fff8ee;
+      color: #895d2f;
+    }
+
+    .diagnostic-note {
+      margin-top: 10px;
+      padding-top: 9px;
+      border-top: 1px solid #ebe5dc;
+      color: #6b5d4e;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
     .resume {
       max-width: 920px;
       margin: 0 auto;
@@ -557,11 +637,29 @@ GPA / 排名 / 相关课程 / 奖项
 证书与奖项：
 请只写真实可追问的技能，不要全部写“精通”。</textarea>
 
+      <section class="diagnostic" aria-live="polite">
+        <div class="diagnostic-head">
+          <strong>岗位匹配诊断</strong>
+          <span>本地分析，不上传内容</span>
+        </div>
+        <div class="score-row">
+          <div class="score-box"><b id="matchScore">0%</b><span>关键词覆盖</span></div>
+          <div class="score-box"><b id="evidenceScore">0%</b><span>成果证据</span></div>
+          <div class="score-box"><b id="clarityScore">0%</b><span>信息完整</span></div>
+        </div>
+        <div class="diagnostic-group"><b>已匹配</b><div class="mini-tags" id="matchedTerms"></div></div>
+        <div class="diagnostic-group"><b>建议补充</b><div class="mini-tags" id="missingTerms"></div></div>
+        <div class="diagnostic-note" id="auditNote">粘贴岗位 JD 和个人经历后，将生成可解释的投递前自检。</div>
+      </section>
+
       <div class="actions">
         <button id="autoGenerate">识别并生成</button>
         <button id="generate">生成简历</button>
         <button class="secondary" id="copy">复制正文</button>
         <button class="secondary" id="print">打印</button>
+        <button class="secondary" id="exportJson">导出数据</button>
+        <button class="secondary" id="importJson">导入数据</button>
+        <input id="jsonInput" type="file" accept="application/json" hidden>
       </div>
     </aside>
 
@@ -655,6 +753,103 @@ GPA / 排名 / 相关课程 / 奖项
         .map(x => x.trim())
         .filter(x => x.length >= 2 && x.length <= 18);
       return Array.from(new Set(words)).slice(0, 8).concat(fallback).slice(0, 10);
+    }
+
+    const stopTerms = new Set([
+      "负责", "参与", "完成", "相关", "工作", "岗位", "要求", "能力", "经验", "优先",
+      "熟悉", "掌握", "具备", "能够", "以及", "进行", "公司", "项目", "团队", "以上",
+      "良好", "较强", "协助", "根据", "通过", "使用", "职位", "任职", "专业"
+    ]);
+
+    function normalizedTerms(text) {
+      const latin = text.match(/[A-Za-z][A-Za-z0-9.+#/-]{1,24}/g) || [];
+      const chinese = text
+        .replace(/[A-Za-z0-9.+#/-]+/g, " ")
+        .split(/[\s，。；、：:（）()【】\[\]｜|/]+/)
+        .flatMap(part => part.length > 8 ? part.split(/与|及|和|或|的|等/) : [part])
+        .map(x => x.trim()
+          .replace(/^(负责|参与|协助|完成|熟悉|掌握|具备|能够|优先考虑)/, "")
+          .replace(/(能力|经验|技能|者优先)$/, ""))
+        .filter(x => x.length >= 2 && x.length <= 12);
+      return Array.from(new Set([...latin, ...chinese]))
+        .filter(term => !stopTerms.has(term.toLowerCase()))
+        .slice(0, 30);
+    }
+
+    function renderMiniTags(id, items, missing = false) {
+      const container = byId(id);
+      container.innerHTML = "";
+      const values = items.length ? items : [missing ? "暂无明显缺口" : "等待分析"];
+      values.slice(0, 10).forEach(item => {
+        const span = document.createElement("span");
+        span.className = `mini-tag${missing ? " missing" : ""}`;
+        span.textContent = item;
+        container.appendChild(span);
+      });
+    }
+
+    function analyzeResume(data) {
+      const resumeText = [data.education, data.work, data.projects, data.skills].join("\n").toLowerCase();
+      const jdTerms = normalizedTerms(data.jd);
+      const matched = jdTerms.filter(term => resumeText.includes(term.toLowerCase()));
+      const missing = jdTerms.filter(term => !resumeText.includes(term.toLowerCase()));
+      const match = jdTerms.length ? Math.round(matched.length / jdTerms.length * 100) : 0;
+
+      const lines = cleanLines([data.work, data.projects].join("\n"));
+      const evidenceLines = lines.filter(line =>
+        /\d+|%|百分|提升|降低|缩短|增长|节省|准确率|排名|用户|客户|收入|成本|规模|模块|文档/.test(line)
+      );
+      const evidence = lines.length ? Math.min(100, Math.round(evidenceLines.length / Math.min(lines.length, 6) * 100)) : 0;
+
+      const required = [data.candidate, data.company, data.role, data.contact, data.jd, data.education, data.work || data.projects, data.skills];
+      const clarity = Math.round(required.filter(value => value && !/目标|候选人|手机 \/ 邮箱/.test(value)).length / required.length * 100);
+
+      const warnings = [];
+      if (!/\d/.test(data.work + data.projects)) warnings.push("经历中缺少可验证的数量、效率、规模或结果");
+      if (/(身份证|身份证号|家庭住址|父母|婚姻状况|银行卡)/.test(data.raw)) warnings.push("原始素材可能包含不建议写入简历的隐私信息");
+      if (/精通/.test(data.skills) && !/年|项目|次|个|套/.test(data.skills + data.work + data.projects)) warnings.push("“精通”缺少经历证据，建议改为具体应用场景");
+      if (missing.length) warnings.push("优先核对 JD 中的缺失词，不会的技能不要为了分数硬加");
+      if (!warnings.length) warnings.push("结构较完整，提交前仍需逐条确认数据和个人贡献可经受面试追问");
+
+      byId("matchScore").textContent = `${match}%`;
+      byId("evidenceScore").textContent = `${evidence}%`;
+      byId("clarityScore").textContent = `${clarity}%`;
+      renderMiniTags("matchedTerms", matched);
+      renderMiniTags("missingTerms", missing, true);
+      byId("auditNote").textContent = warnings.join("；") + "。本结果是透明的关键词自检，不代表任何公司的真实 ATS 评分。";
+    }
+
+    function formData() {
+      return {
+        version: 1,
+        raw: byId("rawProfile").value.trim(),
+        candidate: byId("candidate").value.trim(),
+        company: byId("company").value.trim(),
+        role: byId("role").value.trim(),
+        contact: byId("contact").value.trim(),
+        links: byId("links").value.trim(),
+        jd: byId("jd").value.trim(),
+        education: byId("education").value.trim(),
+        work: byId("work").value.trim(),
+        projects: byId("projects").value.trim(),
+        skills: byId("skills").value.trim()
+      };
+    }
+
+    function applyFormData(data) {
+      ["rawProfile", "candidate", "company", "role", "contact", "links", "jd", "education", "work", "projects", "skills"]
+        .forEach(id => {
+          const key = id === "rawProfile" ? "raw" : id;
+          if (typeof data[key] === "string") byId(id).value = data[key];
+        });
+      updateCompanyAdvice();
+      generate();
+    }
+
+    function saveDraft() {
+      try {
+        localStorage.setItem("resume-polish-draft-v1", JSON.stringify(formData()));
+      } catch (_) {}
     }
 
     function companyStyleAdvice(company, role) {
@@ -842,6 +1037,8 @@ GPA / 排名 / 相关课程 / 奖项
       ];
       byId("outHighlights").innerHTML = highlights.map(x => `<li>${x}</li>`).join("");
       byId("outBullets").innerHTML = bullets.map(x => `<li>${polishedBullet(x, role, company)}</li>`).join("");
+      analyzeResume(formData());
+      saveDraft();
     }
 
     byId("autoGenerate").addEventListener("click", autoRecognize);
@@ -858,12 +1055,38 @@ GPA / 排名 / 相关课程 / 奖项
       reader.readAsDataURL(file);
     });
     byId("print").addEventListener("click", () => window.print());
+    byId("exportJson").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(formData(), null, 2)], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${byId("candidate").value.trim() || "候选人"}-${byId("role").value.trim() || "简历"}-data.json`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    });
+    byId("importJson").addEventListener("click", () => byId("jsonInput").click());
+    byId("jsonInput").addEventListener("change", async event => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      try {
+        applyFormData(JSON.parse(await file.text()));
+      } catch (_) {
+        byId("auditNote").textContent = "导入失败：请选择由本网页导出的 JSON 数据文件。";
+      }
+      event.target.value = "";
+    });
     byId("copy").addEventListener("click", async () => {
       const text = byId("resume").innerText.replace(/\n{3,}/g, "\n\n");
       await navigator.clipboard.writeText(text);
       byId("copy").textContent = "已复制";
       setTimeout(() => byId("copy").textContent = "复制正文", 1200);
     });
+    document.querySelectorAll("aside input:not([type=file]), aside textarea").forEach(field => {
+      field.addEventListener("input", saveDraft);
+    });
+    try {
+      const draft = JSON.parse(localStorage.getItem("resume-polish-draft-v1"));
+      if (draft && draft.version === 1) applyFormData(draft);
+    } catch (_) {}
     updateCompanyAdvice();
     generate();
   </script>
